@@ -11,3 +11,8 @@
 /*.userprefs
 /*.pidb
 /*.booproj
+
+# Sublime
+
+/*.sublime-project
+/*.sublime-workspace
