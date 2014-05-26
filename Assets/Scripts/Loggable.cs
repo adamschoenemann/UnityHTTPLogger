@@ -6,7 +6,6 @@ using System;
 namespace Logging
 {
 
-	// TODO: Get rid of looping logging
 	public class Loggable : MonoBehaviour
 	{
 
