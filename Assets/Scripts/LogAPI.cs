@@ -4,6 +4,8 @@ using System.Threading;
 using System.Collections;
 using System.Collections.Generic;
 
+// TODO: Clean up
+// TODO: Replace setup logic with sync methods and callbacks, instead of coroutines that are idling
 public class LogAPI {
 
 	const string host = "http://www.adamschoenemann.dk/api/log";

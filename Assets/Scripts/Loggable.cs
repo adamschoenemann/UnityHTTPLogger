@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 
+// TODO: Get rid of looping logging
 public class Loggable : MonoBehaviour
 {
 
