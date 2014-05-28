@@ -7,25 +7,21 @@ using System.Text;
 namespace Logging
 {
 	
-	/**
-	 * There should only EVER BE ONE OF THESE IN A PROJECT!!!!
-	 * @type {[type]}
-	 */
 	public class Logger : MonoBehaviour
 	{
 
 		public static Logger instance {get; private set;}
 		public int scene_id { get; private set; }
-		public bool enabled = true;
+		public bool Active = true;
 
 		public bool IsActive()
 		{
-			return (instance != null && this == instance && enabled);
+			return (instance != null && this == instance && Active);
 		}
 
 		void Awake()
 		{
-			if(enabled == false) return;
+			if(Active == false) return;
 			if(instance != null && instance != this)
 			{
 				Destroy(gameObject);
@@ -91,7 +87,7 @@ namespace Logging
 		}
 
 
-		public void RegisterLoggable(Loggable l, Action<int> cb = null)
+		public void RegisterLoggable(Loggable l, Action<int> cb)
 		{
 			if(IsActive() == false) return;
 			StartCoroutine(LogAPI.instance.RegisterLoggable(l, this, cb));
@@ -220,5 +216,4 @@ namespace Logging
 			}
 		}
 	}
-
 }

@@ -9,14 +9,14 @@ namespace Logging
 	public class Loggable : MonoBehaviour
 	{
 
-		public bool enabled = true;
+		public bool Active = true;
 		public string name;
 		public int id {get; private set;}
 		protected Logger logger;
 
 		protected void Awake()
 		{
-			if(enabled == false)
+			if(Active == false)
 				return;
 			SetupLogging();
 		}
@@ -46,7 +46,7 @@ namespace Logging
 
 		public void EnqueueEntry(LogEntry entry)
 		{
-			if(enabled == false) return;
+			if(Active == false) return;
 			if(id <= 0)
 			{
 				StartCoroutine(WaitForId(entry));
