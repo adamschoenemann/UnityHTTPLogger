@@ -1,0 +1,70 @@
+<html>
+<head>
+</head>
+<body>
+  <h2>Basic Info</h2>
+  {{Utils::display_table(@model)}}
+  <table id="basic_info">
+    <tr>
+      <repeat group="{{@table_headers}}" value="{{@th}}">
+        <th>{{@th}}</th>
+      </repeat>
+    </tr>
+    <tr>
+      <repeat group="{{@table_headers}}" value="{{@key}}">
+        <td>
+          <a href="sessions/{{@model.id}}">
+            {{@model[@key]}}
+          </a>
+        </td>
+      </repeat>
+    </tr>
+  </table>
+  <h2>Stats</h2>
+  <table id="stats">
+    <tr>
+      <repeat group="{{array_keys(@stats)}}" value="{{@key}}">
+        <th>{{@key}}</th>
+      </repeat>
+    </tr>
+    <tr>
+      <repeat group="{{@stats}}" value="{{@val}}">
+        <td>{{@val}}</td>
+      </repeat>
+    </tr>
+  </table>
+  <div id="entries">
+    <h2>Entries</h2>
+    <repeat group="{{@entries}}" value="{{@entry}}">
+      <div id="entry_{{@entry.id}}">
+        <h3>Entry {{@entry.id}}</h3>
+        <table id="basic_info">
+          <tr>
+            <th>session_id</th><th>event</th><th>timestamp</th>
+          </tr>
+          <tr>
+            <td>{{@entry.session_id}}</td>
+            <td>{{@entry.event}}</td>
+            <td>{{@entry.timestamp}}</td>
+          </tr>
+        </table>
+        <h4>Vectors</h4>
+        <table id="vector3">
+          <tr>
+            <repeat group="{{array_keys(@entry.vector3[0])}}" value="{{@key}}">
+              <th>{{@key}}</th>
+            </repeat>
+          </tr>
+          <repeat group="{{@entry.vector3}}" value="{{@vector3}}">
+            <tr>
+              <repeat group="{{array_values(@vector3)}}" value="{{@val}}">
+                <td>{{@val}}</td>
+              </repeat>
+            </tr>
+          </repeat>
+        </table>
+      </repeat>
+    </div>
+  </div>
+</body>
+</html>

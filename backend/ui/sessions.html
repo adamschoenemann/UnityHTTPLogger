@@ -1,0 +1,24 @@
+<html>
+<head>
+</head>
+<body>
+  <table>
+    <tr>
+      <repeat group="{{@table_headers}}" value="{{@th}}">
+        <th>{{@th}}</th>
+      </repeat>
+    </tr>
+    <repeat group="{{@models}}" value="{{@model}}">
+      <tr>
+        <repeat group="{{@table_headers}}" value="{{@key}}">
+          <td>
+            <a href="sessions/{{@model.id}}">
+              {{@model[@key]}}
+            </a>
+          </td>
+        </repeat>
+      </tr>
+    </repeat>
+  </table>
+</body>
+</html>
