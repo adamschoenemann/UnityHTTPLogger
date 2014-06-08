@@ -10,7 +10,7 @@ namespace Logging
 	// TODO: Replace setup logic with sync methods and callbacks, instead of coroutines that are idling
 	public class LogAPI {
 
-		const string host = "http://localhost/shepherd_log/api/log";
+		const string host = "http://localhost/unitylogger/api/log";
 		public float logRate = 0.5f;
 
 		[HideInInspector]

@@ -16,3 +16,6 @@ There are four main classes:
 - `LogEntry`
 	- A single entry in the log, consisting of some basic data as well as dynamic meta-data.
 
+## Setup
+- Rename reroute base in .htaccess
+

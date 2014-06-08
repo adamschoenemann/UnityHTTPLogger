@@ -112,7 +112,6 @@ class ViewData extends Controller
 
 	private function get_choices(&$entries)
 	{
-		// return array(1,2,3);
 		$choices = $this->filter_entries_by_event($entries, "Choice");
 		foreach($choices as &$choice)
 		{
@@ -517,13 +516,5 @@ class ViewData extends Controller
 		$this->output($results, $get);
 	}
 
-	function foo($f3, $params)
-	{
-		$id = $f3->get("GET[id]");
-		$db = \Base::instance()->get("db");
-		$respondents = $db->exec("SELECT * FROM answers WHERE session_id=?", $id);
-		$answers = Questionnaire::parse_answers($respondents[0]["answers"]);	
-		Questionnaire::sort_avgs($answers["avgs"]);
-	}
 
 }
