@@ -37,7 +37,7 @@ namespace Logging
 
 		private void SetupLogging()
 		{
-			StartCoroutine(LogAPI.instance.StartSession(this)); // Register session
+			StartCoroutine(LogAPI.instance.RegisterSession(this)); // Register session
 			StartCoroutine(RegisterScene()); // register scene
 		}
 
@@ -56,7 +56,7 @@ namespace Logging
 				Flush();
 			}
 			StartCoroutine(LogAPI.instance.CloseScene(scene_id, this));
-			StartCoroutine(LogAPI.instance.StopSession(this));
+			StartCoroutine(LogAPI.instance.CloseSession(this));
 		}
 
 		private IEnumerator RegisterScene()

@@ -20,32 +20,33 @@ class Controller
 	}
 
 	
-
-	function output($arr, $get, $indent = true)
+	// Output in different formats
+	function output($arr, $options = array())
 	{
-		// Output in different formats
-		if($get["view"] == "csv")
+		// default options
+		$options = $options + array("view" => "json", "indent" => true, "pre" => false);
+
+		if($options["view"] == "csv")
 		{
 			echo \Utils::send_csv(
 				\Utils::array_to_csv($arr),
-				"stats.csv"
+				"output.csv"
 			);
 		}
-		else if($get["view"] == "json")
+		else if($options["view"] == "json")
 		{
-			echo \Utils::json_encode($arr, $indent);
+			if($options["pre"]) echo "<pre>";
+			echo \Utils::json_encode($arr, $options["indent"] == null ? false : $options["indent"]);
+			if($options["pre"]) echo "</pre>";
 		}
-		else if($get["view"] == "plain")
+		else if($options["view"] == "plain")
 		{
 			echo \Utils::array_to_csv($arr);
 		}
-		else if($get["view"] == "table")
+		else if($options["view"] == "table")
 		{
 			echo \Utils::array_to_table($arr);
 		}
-		else
-		{
-			echo \Utils::json_encode($arr, $indent);
-		}
+		
 	}
 }

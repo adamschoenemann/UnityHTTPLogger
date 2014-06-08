@@ -2,14 +2,9 @@
 namespace API;
 class Log extends API {
 
-	public function start_session($f3, $params){
+	public function register_session($f3, $params){
 		$post = $f3->get("POST");
-		// retry test
-	/*	if(intval($post["retries"]) > 0)
-		{
-			$f3->error(500);
-			return;
-		}*/
+
 		if(empty($post["app_version"])){
 			echo "no app version specified";
 			return;
@@ -17,11 +12,6 @@ class Log extends API {
 
 		$this->db->begin();
 
-		// $session = new \Models\Session($this->db);
-		// $session->app_version = $post["app_version"];
-		// $session->MAC = hash("SHA256", $post["MAC"]);
-		// $session->ip = hash("SHA256", $_SERVER['REMOTE_ADDR']);
-		// $session->save();
 		$app_version = $post["app_version"];
 		$MAC = hash("SHA256", $post["MAC"]);
 		$ip = hash("SHA256", $_SERVER["REMOTE_ADDR"]);
@@ -95,12 +85,12 @@ class Log extends API {
 		}
 	}
 
-	public function batch_entries($f3, $params)
+	public function entries($f3, $params)
 	{
 		try
 		{
 			$post = $f3->get("POST");
-			$model = new \Models\Entry($this->db);
+			$model = new \DB\SQL\Mapper($this->db, "entries");
 			$this->db->begin();
 			foreach($post["entries"] as $entry)
 			{
@@ -110,19 +100,19 @@ class Log extends API {
 				$model->time = $entry["time"];
 				$model->save();
 
-				$data_model = new \Models\StringData($this->db);
+				$data_model = new \DB\SQL\Mapper($this->db, "string_data");
 				$this->save_data($entry, "strings", $model, $data_model);
 
-				$data_model = new \Models\IntData($this->db);
+				$data_model = new \DB\SQL\Mapper($this->db, "int_data");
 				$this->save_data($entry, "ints", $model, $data_model);
 				
-				$data_model = new \Models\FloatData($this->db);
+				$data_model = new \DB\SQL\Mapper($this->db, "float_data");
 				$this->save_data($entry, "floats", $model, $data_model);
 
-				$data_model = new \Models\Vector3($this->db);
+				$data_model = new \DB\SQL\Mapper($this->db, "vector3");
 				$this->save_vector3($entry, "vector3s", $model, $data_model);
 
-				$data_model = new \Models\Quaternion($this->db);
+				$data_model = new \DB\SQL\Mapper($this->db, "quaternion");
 				$this->save_quaternion($entry, "quaternions", $model, $data_model);
 
 				$model->reset();
@@ -149,7 +139,7 @@ class Log extends API {
 		try
 		{
 			$post = $f3->get("POST");
-			$model = new \Models\Loggable($this->db);
+			$model = new \DB\SQL\Mapper($this->db, "loggable");
 			$model->copyFrom("POST");
 			$model->save();
 			echo \Utils::json_encode($model->cast());
@@ -166,7 +156,7 @@ class Log extends API {
 	public function register_scene($f3, $params)
 	{
 		$post = $f3->get("POST");
-			$model = new \Models\Scene($this->db);
+			$model = new \DB\SQL\Mapper($this->db, "scene");
 		$model->session_id = $post["session_id"];
 		$model->name = $post["name"];
 		$model->time = $post["time"];
@@ -189,106 +179,8 @@ class Log extends API {
 	}
 
 
-	/**
-	 * Deprecated!
-	 * Logs an object
-	 * @param  [type] $f3     [description]
-	 * @param  [type] $params [description]
-	 * @return [void]         [description]
-	 */
-	public function log_object($f3, $params){
-		$post = $f3->get("POST");
-		$session_id = $post["session_id"];
 
-		
-		$gameobject_id = (isset($post["gameobject_id"])) ? 
-			$post["gameobject_id"] : "";
-
-		$instance_id = (isset($post["instance_id"])) ? 
-			$post["instance_id"] : "";
-
-		// Check for session_id errors
-		if(empty($session_id)){
-			echo "no session_id";
-			return;
-		}
-		$session = new \Models\Session($this->db);
-		$session->load(array("id=?", $session_id));
-		if($session->dry()){
-			echo "session_id not found";
-			return;
-		}
-
-		// Load gameobject based on id or instance_id
-		$gameobject;
-
-		if(empty($gameobject_id) == false){
-			$gameobject = new \Models\GameObject($this->db);
-			$gameobject->load(array("id=?", $gameobject_id));
-
-			if($gameobject->dry()){
-				echo "gameobject_id not found";
-				return;
-			}
-
-			if($gameobject->session_id != $session_id){
-				echo "gameobject and session mismatch";
-				return;
-			}	
-		}
-		else if(empty($instance_id) == false){
-			$gameobject = new \Models\GameObject($this->db);
-			$gameobject->load(
-				array("instance_id=? AND session_id=?",
-					  $instance_id,
-					  $session_id)
-				);
-			if($gameobject->dry()){
-				echo "gameobject not found";
-				return;
-			}
-			if($gameobject->session_id != $session_id){
-				echo "gameobject and session mismatch";
-				return;
-			}
-		}
-		else {
-			echo "no gameobject_id or instance_id given";
-			return;
-		}
-		
-
-		// Actually do stuff to the db
-		$this->db->begin();
-
-		$entry = new \Models\Entry($this->db);
-		$entry->session_id = $session_id;
-		$entry->event = $post["event"];
-		$entry->save();
-
-		$position = new \Models\Vector3($this->db);
-		$position->copyFrom("POST[position]");
-		$position->gameobject_id = $gameobject->id;
-		$position->entry_id = $entry->id;
-		$position->save();
-
-		$rotation = new \Models\Quaternion($this->db);
-		$rotation->copyFrom("POST[rotation]");
-		$rotation->gameobject_id = $gameobject->id;
-		$rotation->entry_id = $entry->id;
-		$rotation->save();
-
-		$this->db->commit();
-
-		echo \Utils::json_encode(array("success" => 1));
-
-	}
-
-	public function test($f3, $params){
-		echo $f3->get("POST[name]");
-	}
-
-	public function stop_session($f3, $params){
+	public function close_session($f3, $params){
 		$id = $f3->get("POST[id]");
 		$this->db->exec("
 			UPDATE sessions

@@ -122,7 +122,7 @@ namespace Logging
 				e.ToForm(form, i);
 			}
 			
-			WWW www = new WWW(host + "/batch_entries", form);
+			WWW www = new WWW(host + "/entries", form);
 			yield return www;
 
 			if(String.IsNullOrEmpty(www.error) == false && context != null)
@@ -208,9 +208,9 @@ namespace Logging
 		}
 
 		/**
-		 * Starts a new session server-side
+		 * Registers a new session server-side
 		 */
-		public IEnumerator StartSession(MonoBehaviour context = null)
+		public IEnumerator RegisterSession(MonoBehaviour context = null)
 		{
 			if(session_id != 0)
 			{
@@ -223,7 +223,7 @@ namespace Logging
 			form.AddField("app_version", appv.ToString());	
 			form.AddField("MAC", Utils.GetMacAddress());
 
-			WWW www = new WWW(host + "/start_session", form);
+			WWW www = new WWW(host + "/register_session", form);
 			yield return www;
 
 			if(String.IsNullOrEmpty(www.error) == false && context != null)
@@ -243,10 +243,10 @@ namespace Logging
 			return (session_id == 0);
 		}
 
-		public IEnumerator StopSession(MonoBehaviour context = null){
+		public IEnumerator CloseSession(MonoBehaviour context = null){
 			WWWForm form = new WWWForm();
 			form.AddField("id", session_id);
-			WWW www = new WWW(host + "/stop_session", form);
+			WWW www = new WWW(host + "/close_session", form);
 			yield return www;
 
 			if(String.IsNullOrEmpty(www.error) == false && context != null)

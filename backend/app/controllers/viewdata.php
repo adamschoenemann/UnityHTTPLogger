@@ -15,6 +15,27 @@ class ViewData extends Controller
 
 	}
 
+
+	function sessions($f3, $params)
+	{
+		$r = $this->db->exec("SELECT * FROM sessions");
+		$this->output($r, $f3->get("GET"));
+	}
+
+	function scenes($f3, $params)
+	{
+		$r = $this->db->exec("SELECT * FROM scenes");
+		$this->output($r, $f3->get("GET"));	
+	}
+
+	function entries($f3, $params)
+	{
+		$r = $this->db->exec("SELECT * FROM entries");
+		$this->output($r, $f3->get("GET"));	
+	}
+
+	/*
+
 	function view_scene($f3, $params)
 	{
 		$scenes = $this->db->exec("
@@ -308,8 +329,14 @@ class ViewData extends Controller
 		$results = array();
 		$cache = array();
 
+		
 		// Results computing
 		$statfuns = array(
+			"entries" => function($i, $s) {
+				$entries = $db->exec("SELECT * FROM entries");
+				echo "hey";
+				return array("entries" => $entries);
+			},
 			"OCEAN" => function($i, $s) {
 				if($cache["avgs"] != NULL)
 					return $cache["avgs"];
@@ -515,6 +542,6 @@ class ViewData extends Controller
 		// Output
 		$this->output($results, $get);
 	}
-
+	*/
 
 }
