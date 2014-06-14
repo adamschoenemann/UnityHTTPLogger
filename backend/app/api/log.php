@@ -139,7 +139,7 @@ class Log extends API {
 		try
 		{
 			$post = $f3->get("POST");
-			$model = new \DB\SQL\Mapper($this->db, "loggable");
+			$model = new \DB\SQL\Mapper($this->db, "loggables");
 			$model->copyFrom("POST");
 			$model->save();
 			echo \Utils::json_encode($model->cast());
@@ -155,7 +155,6 @@ class Log extends API {
 
 	public function register_scene($f3, $params)
 	{
-		echo "hey";
 		try
 		{
 			$post = $f3->get("POST");

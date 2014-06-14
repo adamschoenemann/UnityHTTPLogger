@@ -1,8 +1,11 @@
+// DEFINE DEBUG HERE IF YOU WANT DEBUG OUTPUT
+#define DEBUG
 using UnityEngine;
 using System;
 using System.Threading;
 using System.Collections;
 using System.Collections.Generic;
+
 
 namespace Logging
 {
@@ -10,8 +13,9 @@ namespace Logging
 	// TODO: Replace setup logic with sync methods and callbacks, instead of coroutines that are idling
 	public class LogAPI {
 
-		const string host = "http://localhost/unitylogger/api/log";
-		public float logRate = 0.5f;
+		// CONFIG
+		public const string Host = "http://localhost/unitylogger/api/log";
+		private const int entryQueueSize = 10;
 
 		[HideInInspector]
 		public int session_id {get; private set;}
@@ -33,21 +37,20 @@ namespace Logging
 			}
 		}
 
-		private bool sessionClosed = false;
 		public bool SessionClosed
 		{
-			get {return sessionClosed;}
-			private set { sessionClosed = value; }
+			get; private set;
 		}
 
-		private const int size = 10;
-		private Queue<LogEntry> entryQueue = new Queue<LogEntry>(size);
+		private Queue<LogEntry> entryQueue = new Queue<LogEntry>(entryQueueSize);
 
 		// ----------------------------- Methods -------------------------
 
 		private LogAPI()
 		{
-			Debug.Log("New LogAPI created");
+			#if DEBUG
+				Debug.Log("New LogAPI created");
+			#endif
 			session_id = 0;
 			Flushing = false;
 		}
@@ -69,7 +72,7 @@ namespace Logging
 			form.AddField("scene_id", logger.scene_id);
 
 			
-			WWW www = new WWW(host + "/register_loggable", form);
+			WWW www = new WWW(Host + "/register_loggable", form);
 			yield return www;
 
 			if(String.IsNullOrEmpty(www.error) == false)
@@ -78,7 +81,9 @@ namespace Logging
 			}
 
 			JSONObject json = HandleResponse(www);
-			Debug.Log("Registered: " + json.ToString());
+			#if DEBUG
+				Debug.Log("Registered: " + json.ToString());
+			#endif
 			if(cb != null)
 			{
 				cb((int) json[0]["id"].n);
@@ -89,8 +94,10 @@ namespace Logging
 		{
 			e.session_id = session_id;
 			entryQueue.Enqueue(e);
-			Debug.Log("Enqueue: " + e.event_name);
-			if(entryQueue.Count >= size)
+			#if DEBUG
+				Debug.Log("Enqueue: " + e.event_name);
+			#endif
+			if(entryQueue.Count >= entryQueueSize)
 			{
 				return true;
 			}
@@ -110,7 +117,9 @@ namespace Logging
 			while(session_id <= 0)
 				yield return true;
 			
-			Debug.Log("Flushing...");
+			#if DEBUG
+				Debug.Log("Flushing...");
+			#endif
 			Flushing = true;
 			WWWForm form = new WWWForm();
 			LogEntry[] entries = new LogEntry[entryQueue.Count];
@@ -122,7 +131,7 @@ namespace Logging
 				e.ToForm(form, i);
 			}
 			
-			WWW www = new WWW(host + "/entries", form);
+			WWW www = new WWW(Host + "/entries", form);
 			yield return www;
 
 			if(String.IsNullOrEmpty(www.error) == false && context != null)
@@ -131,7 +140,9 @@ namespace Logging
 			}
 
 			JSONObject json = HandleResponse(www);
-			Debug.Log("Entry post: " + json.ToString());
+			#if DEBUG
+				Debug.Log("Entry post: " + json.ToString());
+			#endif
 			Flushing = false;
 		}
 
@@ -147,17 +158,21 @@ namespace Logging
 
 			// if(logger.scene_id != 0)
 			// {
-			// 	Debug.Log("I want to close the current scene");
+			#if DEBUG
+				// 	Debug.Log("I want to close the current scene");
+			#endif
 			// 	yield return logger.StartCoroutine(CloseScene(logger));
 			// }
 
-			Debug.Log("Registering scene");
+			#if DEBUG
+				Debug.Log("Registering scene");
+			#endif
 			WWWForm form = new WWWForm();
 			form.AddField("session_id", session_id);
 			form.AddField("name", name);
 			form.AddField("time", time.ToString());
 
-			WWW www = new WWW(host + "/register_scene", form);
+			WWW www = new WWW(Host + "/register_scene", form);
 			yield return www;
 			
 			if(String.IsNullOrEmpty(www.error) == false && context != null)
@@ -176,7 +191,9 @@ namespace Logging
 		private JSONObject HandleResponse(WWW www)
 		{
 			if(String.IsNullOrEmpty(www.error) == false){
-				Debug.Log("url: "+ www.url + "\nerror: " + www.error);
+				#if DEBUG
+					Debug.Log("url: "+ www.url + "\nerror: " + www.error);
+				#endif
 			}
 
 			JSONObject json = new JSONObject(www.text);
@@ -187,8 +204,10 @@ namespace Logging
 		public IEnumerator CloseScene
 		(int scene_id, MonoBehaviour context = null, Action cb = null)
 		{
-			Debug.Log("Closing scene with id: " + scene_id);
-			string url = host + "/close_scene/";
+			#if DEBUG
+				Debug.Log("Closing scene with id: " + scene_id);
+			#endif
+			string url = Host + "/close_scene/";
 			WWWForm form = new WWWForm();
 			form.AddField("id", scene_id);
 			WWW www = new WWW(url, form);
@@ -216,14 +235,18 @@ namespace Logging
 			{
 				yield return false;
 			}
-			Debug.Log("Registering new session...");
+			#if DEBUG
+				Debug.Log("Registering new session...");
+			#endif
 			
 			WWWForm form = new WWWForm();
-			int appv = (Debug.isDebugBuild) ? 1 : 2;
+			#if DEBUG
+				int appv = (Debug.isDebugBuild) ? 1 : 2;
+			#endif
 			form.AddField("app_version", appv.ToString());	
 			form.AddField("MAC", Utils.GetMacAddress());
 
-			WWW www = new WWW(host + "/register_session", form);
+			WWW www = new WWW(Host + "/register_session", form);
 			yield return www;
 
 			if(String.IsNullOrEmpty(www.error) == false && context != null)
@@ -234,7 +257,9 @@ namespace Logging
 
 			JSONObject json = HandleResponse(www);
 			session_id = (int) json[0]["id"].n;
-			Debug.Log("Session registed with id: " + json[0]["id"]);
+			#if DEBUG
+				Debug.Log("Session registed with id: " + json[0]["id"]);
+			#endif
 
 		}
 
@@ -246,7 +271,7 @@ namespace Logging
 		public IEnumerator CloseSession(MonoBehaviour context = null){
 			WWWForm form = new WWWForm();
 			form.AddField("id", session_id);
-			WWW www = new WWW(host + "/close_session", form);
+			WWW www = new WWW(Host + "/close_session", form);
 			yield return www;
 
 			if(String.IsNullOrEmpty(www.error) == false && context != null)
@@ -255,7 +280,9 @@ namespace Logging
 			}
 			SessionClosed = true;
 
-			Debug.Log("session finished: " + www.text);
+			#if DEBUG
+				Debug.Log("session finished: " + www.text);
+			#endif
 		}
 
 
