@@ -155,13 +155,24 @@ class Log extends API {
 
 	public function register_scene($f3, $params)
 	{
-		$post = $f3->get("POST");
-			$model = new \DB\SQL\Mapper($this->db, "scene");
-		$model->session_id = $post["session_id"];
-		$model->name = $post["name"];
-		$model->time = $post["time"];
-		$model->save();
-		echo \Utils::json_encode($model->cast());
+		echo "hey";
+		try
+		{
+			$post = $f3->get("POST");
+				$model = new \DB\SQL\Mapper($this->db, "scenes");
+			$model->session_id = $post["session_id"];
+			$model->name = $post["name"];
+			$model->time = $post["time"];
+			$model->save();
+			echo \Utils::json_encode($model->cast());
+		}
+		catch (\Exception $e)
+		{
+			echo \Utils::json_encode(
+				array("message" => $e->getMessage(),
+					  "post"    => $post)
+			);	
+		}
 	}
 
 	public function close_scene($f3, $params)
